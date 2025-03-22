@@ -132,9 +132,9 @@ const profile = () => {
         </View>
       ) : null}
     {!isEdit?(
-            <View className="flex-row items-center p-3 gap-2 mt-5 ">
+            <View className="flex-row items-center p-3 gap-2 mt-4 ">
             <TouchableOpacity
-              className=" flex-row items-center p-3 gap-2 mt-5 "
+              className=" flex-row items-center p-3 gap-2 mt-4 "
               style={{
                 borderWidth: 2,
                 paddingVertical: 10,
@@ -157,7 +157,7 @@ const profile = () => {
               />
             </TouchableOpacity>
             <TouchableOpacity
-              className=" flex-row items-center p-3 gap-2 mt-5 "
+              className=" flex-row items-center p-3 gap-2 mt-4 "
               style={{
                 borderWidth: 2,
                 paddingVertical: 10,
@@ -179,9 +179,9 @@ const profile = () => {
             </TouchableOpacity>
           </View>
     ):(
-      <View className="flex-row items-center p-3 gap-2 mt-5 ">
+      <View className="flex-row items-center p-3 gap-2 mt-2 ">
       <TouchableOpacity
-        className=" flex-row items-center p-3 gap-2 mt-5 "
+        className=" flex-row items-center p-3 gap-2 mt-2 "
         style={{
           borderWidth: 2,
           paddingVertical: 10,
@@ -204,7 +204,7 @@ const profile = () => {
         />
       </TouchableOpacity>
       <TouchableOpacity
-        className=" flex-row items-center p-3 gap-2 mt-5 "
+        className=" flex-row items-center p-3 gap-2 mt-2 "
         style={{
           borderWidth: 2,
           paddingVertical: 10,
@@ -213,6 +213,7 @@ const profile = () => {
           alignItems: "center",
           borderColor: "#0400FF",
         }}
+        onPress={handleLogin}
       >
         <CustomTextBold style={{ color: "black", fontSize: 16 }}>
           Đăng xuất
