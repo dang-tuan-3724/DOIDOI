@@ -49,19 +49,6 @@ const _layout = () => {
         }}
       />
       <Tabs.Screen
-        name="login"
-        options={{
-          title: 'Login',
-          headerShown: false,
-          tabBarIcon: ({ focused }) => (
-            <Image
-              source={require('@/assets/icons/arrow_icon.png')}
-              style={{ width: focused ? 42 : 32, height: focused ? 42 : 32 }}
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="addDevice"
         options={{
           title: 'Add',
@@ -113,8 +100,6 @@ const _layout = () => {
           ),
         }}
       />
-
-
     </Tabs>
   )
 }

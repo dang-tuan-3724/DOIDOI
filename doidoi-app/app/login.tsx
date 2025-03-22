@@ -1,10 +1,18 @@
 import { View, Text, TextInput, TouchableOpacity, Image } from "react-native";
 import React, { useState } from "react";
 import CustomText from "@/components/CustomText";
+import { useRouter } from "expo-router";
 import CustomTextMedium from "@/components/CustomTextMedium";
 import CustomTextBold from "@/components/CustomTextBold";
+
 const login = () => {
   const [showSignUp, setShowSignUp] = useState(false);
+  const router = useRouter();
+
+  const handleLogin = () => {
+    router.replace("/(tabs)"); // Chuyển hướng sang trang chính
+  };
+
   return (
     <View className="flex-1 justify-center items-center gap-2">
       <Image
@@ -72,6 +80,13 @@ const login = () => {
           alignItems: "center",
           borderColor: "#0400FF",
         }}
+        onPress={() => {
+          if (showSignUp) {
+            setShowSignUp(false);
+          } else {
+            handleLogin();
+          }
+        }}        
       >
         {showSignUp ? (
           <CustomTextBold style={{ color: "black", fontSize: 16 }}>

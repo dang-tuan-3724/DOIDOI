@@ -6,7 +6,7 @@ import CustomText from "@/components/CustomText";
 import CustomTextMedium from "@/components/CustomTextMedium";
 import CustomTextBold from "@/components/CustomTextBold";
 
-export default function Index() {
+const Index = () => {
   const [fontsLoaded] = useFonts({
     "Quicksand-Regular": require("@/assets/fonts/Quicksand-Regular.ttf"),
     "Quicksand-Medium": require("@/assets/fonts/Quicksand-Medium.ttf"),
@@ -33,3 +33,5 @@ export default function Index() {
     </View>
   );
 }
+
+export default Index;

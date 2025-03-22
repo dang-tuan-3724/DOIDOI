@@ -6,10 +6,17 @@ import {
   ScrollView,
 } from "react-native";
 import React, { useState } from "react";
+import { useRouter } from "expo-router";
 import CustomTextBold from "@/components/CustomTextBold";
 import CustomTextMedium from "@/components/CustomTextMedium";
+
 const profile = () => {
   const [isEdit, setIsEdit] = useState(false);
+  const router = useRouter();
+
+  const handleLogin = () => {
+    router.replace("/login"); 
+  };
   return (
     <View className="flex-1 mt-20 items-center gap-1">
       {/* <ScrollView contentContainerStyle={{ paddingBottom: 80 }}> */}
@@ -159,6 +166,7 @@ const profile = () => {
                 alignItems: "center",
                 borderColor: "#0400FF",
               }}
+              onPress={handleLogin}
             >
               <CustomTextBold style={{ color: "black", fontSize: 16 }}>
                 Đăng xuất
