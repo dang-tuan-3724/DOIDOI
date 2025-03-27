@@ -8,8 +8,20 @@ import {
 import React, { useState } from "react";
 import CustomTextBold from "@/components/CustomTextBold";
 import CustomTextMedium from "@/components/CustomTextMedium";
+import { Modal } from "@/components/Modal";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 const profile = () => {
   const [isEdit, setIsEdit] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const handlePress = () => {
+    AsyncStorage.removeItem("userToken");
+    setModalVisible(true);
+    const timer = setTimeout(() => {
+      setModalVisible(false);
+    }, 2000);
+    return () => clearTimeout(timer);
+  };
   return (
     <View className="flex-1 mt-20 items-center gap-1">
       {/* <ScrollView contentContainerStyle={{ paddingBottom: 80 }}> */}
@@ -124,78 +136,90 @@ const profile = () => {
           />
         </View>
       ) : null}
-    {!isEdit?(
-            <View className="flex-row items-center p-3 gap-2 mt-5 ">
-            <TouchableOpacity
-              className=" flex-row items-center p-3 gap-2 mt-5 "
-              style={{
-                borderWidth: 2,
-                paddingVertical: 10,
-                borderRadius: 50,
-                marginHorizontal: 20,
-                alignItems: "center",
-                borderColor: "#0400FF",
-              }}
-              onPress={() => {
-                setIsEdit(true);
-              }}
-            >
-              <CustomTextBold style={{ color: "black", fontSize: 16 }}>
-                Chỉnh sửa
-              </CustomTextBold>
-    
-              <Image
-                source={require("@/assets/icons/arrow_icon.png")}
-                className="w-10 h-10"
-              />
-            </TouchableOpacity>
-            <TouchableOpacity
-              className=" flex-row items-center p-3 gap-2 mt-5 "
-              style={{
-                borderWidth: 2,
-                paddingVertical: 10,
-                borderRadius: 50,
-                marginHorizontal: 20,
-                alignItems: "center",
-                borderColor: "#0400FF",
-              }}
-            >
-              <CustomTextBold style={{ color: "black", fontSize: 16 }}>
-                Đăng xuất
-              </CustomTextBold>
-    
-              <Image
-                source={require("@/assets/icons/arrow_icon.png")}
-                className="w-10 h-10"
-              />
-            </TouchableOpacity>
-          </View>
-    ):(
-      <View className="flex-row items-center p-3 gap-2 mt-5 ">
-      <TouchableOpacity
-        className=" flex-row items-center p-3 gap-2 mt-5 "
-        style={{
-          borderWidth: 2,
-          paddingVertical: 10,
-          borderRadius: 50,
-          marginHorizontal: 20,
-          alignItems: "center",
-          borderColor: "#0400FF",
-        }}
-        onPress={() => {
-          setIsEdit(false);
-        }}
-      >
-        <CustomTextBold style={{ color: "black", fontSize: 16 }}>
-          Hủy
-        </CustomTextBold>
+      {!isEdit ? (
+        <View className="flex-row items-center p-3 gap-2 mt-5 ">
+          <TouchableOpacity
+            className=" flex-row items-center p-3 gap-2 mt-5 "
+            style={{
+              borderWidth: 2,
+              paddingVertical: 10,
+              borderRadius: 50,
+              marginHorizontal: 20,
+              alignItems: "center",
+              borderColor: "#0400FF",
+            }}
+            onPress={() => {
+              setIsEdit(true);
+            }}
+          >
+            <CustomTextBold style={{ color: "black", fontSize: 16 }}>
+              Chỉnh sửa
+            </CustomTextBold>
 
-        <Image
-          source={require("@/assets/icons/arrow_icon.png")}
-          className="w-10 h-10"
-        />
-      </TouchableOpacity>
-      <TouchableOpacity
+            <Image
+              source={require("@/assets/icons/arrow_icon.png")}
+              className="w-10 h-10"
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+            className=" flex-row items-center p-3 gap-2 mt-5 "
+            style={{
+              borderWidth: 2,
+              paddingVertical: 10,
+              borderRadius: 50,
+              marginHorizontal: 20,
+              alignItems: "center",
+              borderColor: "#0400FF",
+            }}
+            onPress={() => {
+              handlePress();
+            }}
+          >
+            <CustomTextBold style={{ color: "black", fontSize: 16 }}>
+              Đăng xuất
+            </CustomTextBold>
+
+            <Image
+              source={require("@/assets/icons/arrow_icon.png")}
+              className="w-10 h-10"
+            />
+          </TouchableOpacity>
+          <Modal isOpen={modalVisible} withInput={false}>
+            <View className="bg-[#FFFFFF] w-full p-4 gap-4 rounded-[30px] shadow-[0_0_10px_10px_rgba(124,245,255,0.25)] ml-5 mr-5 items-center justify-center border-solid border-[1px] border-[#448AFD] ">
+              <Image source={require("@/assets/icons/success_icon.png")} />
+              <CustomTextBold>Đăng xuất thành công</CustomTextBold>
+              <CustomTextMedium>
+                Hãy kiểm tra trong phần quản lý thiết bị
+              </CustomTextMedium>
+            </View>
+          </Modal>
+        </View>
+      ) : (
+        <View className="flex-row items-center p-3 gap-2 mt-5 ">
+          <TouchableOpacity
+            className=" flex-row items-center p-3 gap-2 mt-5 "
+            style={{
+              borderWidth: 2,
+              paddingVertical: 10,
+              borderRadius: 50,
+              marginHorizontal: 20,
+              alignItems: "center",
+              borderColor: "#0400FF",
+            }}
+            onPress={() => {
+              setIsEdit(false);
+            }}
+          >
+            <CustomTextBold style={{ color: "black", fontSize: 16 }}>
+              Hủy
+            </CustomTextBold>
+
+            <Image
+              source={require("@/assets/icons/arrow_icon.png")}
+              className="w-10 h-10"
+            />
+          </TouchableOpacity>
+          {/* <TouchableOpacity
         className=" flex-row items-center p-3 gap-2 mt-5 "
         style={{
           borderWidth: 2,
@@ -205,6 +229,7 @@ const profile = () => {
           alignItems: "center",
           borderColor: "#0400FF",
         }}
+        onPress={() => setModalVisible(true)}
       >
         <CustomTextBold style={{ color: "black", fontSize: 16 }}>
           Đăng xuất
@@ -214,9 +239,9 @@ const profile = () => {
           source={require("@/assets/icons/arrow_icon.png")}
           className="w-10 h-10"
         />
-      </TouchableOpacity>
-    </View>
-    )}
+      </TouchableOpacity> */}
+        </View>
+      )}
       {/* </ScrollView> */}
     </View>
   );

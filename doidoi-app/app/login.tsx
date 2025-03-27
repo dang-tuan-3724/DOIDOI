@@ -3,8 +3,20 @@ import React, { useState } from "react";
 import CustomText from "@/components/CustomText";
 import CustomTextMedium from "@/components/CustomTextMedium";
 import CustomTextBold from "@/components/CustomTextBold";
+import { Modal } from "@/components/Modal";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 const login = () => {
   const [showSignUp, setShowSignUp] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const handlePress = () => {  
+    AsyncStorage.setItem("userToken", "123456");
+    setModalVisible(true);
+    const timer = setTimeout(() => {
+      setModalVisible(false);
+    }, 2000);
+    return () => clearTimeout(timer);
+  };
   return (
     <View className="flex-1 justify-center items-center gap-2">
       <Image
@@ -72,6 +84,9 @@ const login = () => {
           alignItems: "center",
           borderColor: "#0400FF",
         }}
+        onPress={() => {
+          handlePress();
+        }}
       >
         {showSignUp ? (
           <CustomTextBold style={{ color: "black", fontSize: 16 }}>
@@ -87,6 +102,27 @@ const login = () => {
           className="w-10 h-10"
         />
       </TouchableOpacity>
+      {showSignUp ? (
+        <Modal isOpen={modalVisible} withInput={false}>
+          <View className="bg-[#FFFFFF] w-full p-4 gap-4 rounded-[30px] shadow-[0_0_10px_10px_rgba(124,245,255,0.25)] ml-5 mr-5 items-center justify-center border-solid border-[1px] border-[#448AFD] ">
+            <Image source={require("@/assets/icons/success_icon.png")} />
+            <CustomTextBold>Đăng kí thành công</CustomTextBold>
+            <CustomTextMedium style={{ textAlign: "center" }}>
+              Bạn có thể kiểm tra và hiệu chỉnh thông tin trong phần hồ sơ
+            </CustomTextMedium>
+          </View>
+        </Modal>
+      ) : (
+        <Modal isOpen={modalVisible} withInput={false}>
+          <View className="bg-[#FFFFFF] w-full p-4 gap-4 rounded-[30px] shadow-[0_0_10px_10px_rgba(124,245,255,0.25)] ml-5 mr-5 items-center justify-center border-solid border-[1px] border-[#448AFD] ">
+            <Image source={require("@/assets/icons/success_icon.png")} />
+            <CustomTextBold>Đăng nhập thành công</CustomTextBold>
+            <CustomTextMedium className="text-center">
+              Bạn có thể kiểm tra và hiệu chỉnh thông tin trong phần hồ sơ
+            </CustomTextMedium>
+          </View>
+        </Modal>
+      )}
       {!showSignUp ? (
         <CustomText onPress={() => setShowSignUp(true)} className="m-5">
           Bạn chưa có tài khoản ? <CustomTextBold> Đăng kí ngay</CustomTextBold>
