@@ -8,7 +8,6 @@ import CustomTextBold from "@/components/CustomTextBold";
 import { LineChart } from "react-native-chart-kit";
 
 const Index = () => {
-const Index = () => {
   const [fontsLoaded] = useFonts({
     "Quicksand-Regular": require("@/assets/fonts/Quicksand-Regular.ttf"),
     "Quicksand-Medium": require("@/assets/fonts/Quicksand-Medium.ttf"),

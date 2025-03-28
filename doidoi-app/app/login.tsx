@@ -2,10 +2,8 @@ import { View, Text, TextInput, TouchableOpacity, Image } from "react-native";
 import React, { useState } from "react";
 import CustomText from "@/components/CustomText";
 import { useRouter } from "expo-router";
-import { useRouter } from "expo-router";
 import CustomTextMedium from "@/components/CustomTextMedium";
 import CustomTextBold from "@/components/CustomTextBold";
-<<<<<<< HEAD
 import { Modal } from "@/components/Modal";
 
 const login = () => {
