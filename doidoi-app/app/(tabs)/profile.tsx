@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import React, { useState } from "react";
 import { useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import CustomTextBold from "@/components/CustomTextBold";
 import CustomTextMedium from "@/components/CustomTextMedium";
 import { Modal } from "@/components/Modal";
