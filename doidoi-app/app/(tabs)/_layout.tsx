@@ -36,17 +36,17 @@ const _layout = () => {
     >
 
       <Tabs.Screen
-      name="log"
-      options={{
-        title: "Log",
-        headerShown: false,
-        tabBarIcon: ({ focused }) => (
-        <Image
-          source={require("@/assets/icons/log_icon.png")}
-          style={{ width: focused ? 38 : 31, height: focused ? 38 : 31 }}
-        />
-        ),
-      }}
+        name="profile"
+        options={{
+          title: 'You',
+          headerShown: false,
+          tabBarIcon: ({ focused }) => (
+            <Image
+              source={require('@/assets/icons/you_icon.png')}
+              style={{ width: focused ? 42 : 32, height: focused ? 42 : 32 }}
+            />
+          ),
+        }}
       />
       <Tabs.Screen
       name="addDevice"
