@@ -19,7 +19,7 @@ const Index = () => {
     return <AppLoading />; // Hoặc return null để chờ font load
   }
   return (
-    <ScrollView className="flex-1 bg-[#FFFFFF]">
+    <ScrollView className="flex-1 bg-[#FFFFFF] mb-[90px]">
       <View className="flex-1 justify-center items-center gap-5">
         <View className="flex-1 justify-center items-center w-[90%] h-60 bg-[#9AF7FF] rounded-[30px] mt-5">
           <CustomTextBold className="">Tình trạng vườn của bạn</CustomTextBold>
