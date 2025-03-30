@@ -3,6 +3,8 @@ B1: cd doidoi-app
 B2: (chỉ làm 1 lần đầu) npm install để cài đặt các module cần thiết
 B3: npx expo start
 
+./doidoi-app/api/apiManager.ts sửa local_ip thành your ip local device 192.168.x.x
+
 Git commit:
 message: .... to ....
 feat: thêm tính năng mới ----- feat(author): add file/folder to ....
