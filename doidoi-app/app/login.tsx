@@ -1,17 +1,82 @@
-import { View, Text, TextInput, TouchableOpacity, Image } from "react-native";
-import React, { useState } from "react";
+import { View, Text, TextInput, TouchableOpacity, Image, Alert } from "react-native";
+import React, { useState, useEffect } from "react";
 import CustomText from "@/components/CustomText";
 import { useRouter } from "expo-router";
 import CustomTextMedium from "@/components/CustomTextMedium";
 import CustomTextBold from "@/components/CustomTextBold";
 import { Modal } from "@/components/Modal";
+import authService from "@/api/authUser";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const login = () => {
-  const [showSignUp, setShowSignUp] = useState(false);
   const router = useRouter();
+  const [showSignUp, setShowSignUp] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const handleLogin = () => {
-    router.replace("/(tabs)"); // Chuyển hướng sang trang chính
+  const [input, setInput] = useState("");
+  const [userName, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setconfirmPassword] = useState("");
+
+  const handleLogin = async () => {
+    authService
+      .login(userName, password)
+      .then(async (response) => {
+        await AsyncStorage.setItem("AccessToken", response.token);
+        await AsyncStorage.setItem("userInfo", JSON.stringify(response.username));
+        await AsyncStorage.setItem("userID", response.userID.toString());
+        
+        setInput(response?.msg);
+        setUsername("");
+        setPassword("");
+        setModalVisible(true);
+
+        setTimeout(() => {
+          setModalVisible(false);
+          setShowSignUp(false);
+          router.replace("/(tabs)");
+        }, 2000);
+      })
+      .catch((error) => {
+        if (error.response?.status === 400) {
+          const errorMessage = error.response.data?.error;
+          Alert.alert("Error", errorMessage, [{ text: "OK" }]);
+          return;
+        } else {
+          console.error(error.response);
+          return;   
+        }
+      });
+  };
+
+  const handleSignUp = async () => {
+    if (password !== confirmPassword) {
+      Alert.alert("Wrong password", "Password must be matched!", [{ text: "OK" }]);
+      return;
+    }
+    
+    authService
+      .signUp(userName, password)
+      .then((response) => {
+        setUsername(response.username);
+        setInput(response?.msg);
+        setPassword("");
+        setconfirmPassword("");
+        setModalVisible(true);
+        setTimeout(() => {
+          setModalVisible(false);
+          setShowSignUp(false);
+        }, 2000);
+      })
+      .catch((error) => {         
+        if (error.response?.status === 400) {
+          const errorMessage = error.response.data?.error;
+          Alert.alert("Error", errorMessage, [{ text: "OK" }]);
+          return;
+        } else {
+          console.error(error.response);
+          return;   
+        }
+      });
   };
 
   return (
@@ -36,6 +101,8 @@ const login = () => {
           fontFamily: "Quicksand-Medium",
           color: "black",
         }}
+        onChangeText={(text) => setUsername(text)}
+        value={userName}
       />
       <TextInput
         placeholder="Mật khẩu"
@@ -52,10 +119,13 @@ const login = () => {
           fontFamily: "Quicksand-Medium",
           color: "black",
         }}
+        onChangeText={(text) => setPassword(text)}
+        value={password}
+        secureTextEntry={true}
       />
       {showSignUp ? (
         <TextInput
-          placeholder="Nhap lai Mật khẩu"
+          placeholder="Nhập lại Mật khẩu"
           placeholderTextColor="#888888"
           style={{
             borderRadius: 15,
@@ -69,6 +139,9 @@ const login = () => {
             fontFamily: "Quicksand-Medium",
             color: "black",
           }}
+          onChangeText={(text) => setconfirmPassword(text)}
+          value={confirmPassword}
+          secureTextEntry={true}
         />
       ) : null}
       <TouchableOpacity
@@ -83,7 +156,7 @@ const login = () => {
         }}
         onPress={() => {
           if (showSignUp) {
-            setShowSignUp(false);
+            handleSignUp();
           } else {
             handleLogin();
           }
@@ -107,7 +180,7 @@ const login = () => {
         <Modal isOpen={modalVisible} withInput={false}>
           <View className="bg-[#FFFFFF] w-full p-4 gap-4 rounded-[30px] shadow-[0_0_10px_10px_rgba(124,245,255,0.25)] ml-5 mr-5 items-center justify-center border-solid border-[1px] border-[#448AFD] ">
             <Image source={require("@/assets/icons/success_icon.png")} />
-            <CustomTextBold>Đăng kí thành công</CustomTextBold>
+            <CustomTextBold>{input}</CustomTextBold>
             <CustomTextMedium style={{ textAlign: "center" }}>
               Bạn có thể kiểm tra và hiệu chỉnh thông tin trong phần hồ sơ
             </CustomTextMedium>
