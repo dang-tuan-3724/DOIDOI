@@ -8,6 +8,7 @@ import {
   StyleSheet,
 } from "react-native";
 import React, { useState, useEffect } from "react";
+import { Alert } from "react-native";
 import { useRouter } from "expo-router";
 import CustomTextBold from "@/components/CustomTextBold";
 import CustomTextMedium from "@/components/CustomTextMedium";
@@ -15,65 +16,115 @@ import { Modal } from "@/components/Modal";
 import CustomText from "@/components/CustomText";
 import authService from "@/api/authUser";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
+import { isValidEmail, isValidPhone } from "@/helper/validation"
 
 const profile = () => {
   const router = useRouter();
   const [isEdit, setIsEdit] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [isSave, setIsSave] = useState(false);
+  const [originalUserInfor, setOriginalUserInfor] = useState<{
+    username: string;
+    userID: string;
+    password: string;
+    email: string;
+    fullName: string;
+    phoneNum: string;
+  } | null>(null);
   const [userInfor, setUserInfor] = useState({
     username: "",
     userID: "",
     password: "",
     email: "",
-    firstName: "",
-    lastName: "",
+    fullName: "",
     phoneNum: ""
   });
 
   useEffect(() => {
     const getInfo = async () => {
-      try {
-        const token = await AsyncStorage.getItem("AccessToken");
-        const userID = await AsyncStorage.getItem("userID");
-        if (userID && token) {
-          const userInfo = await authService.getUserInfo(parseInt(userID, 10), token);
-          console.log(token);
+      let token = await AsyncStorage.getItem("AccessToken");
+      const userID = await AsyncStorage.getItem("userID");
+      if (userID && token) {
+        authService
+        .getUserInfo(parseInt(userID, 10), token)
+        .then((response) => {          
+          const fullName = `${response.user.firstName ?? ""} ${response.user.lastName ?? ""}`.trim();
           
-          console.log(userInfo);
-          
-          setUserInfor((prevState) => ({
-            ...prevState, 
-            username: userInfo.userName || "", 
-            userID: userInfo.userID || "", 
-            password: userInfo.password || "",
-            email: userInfo.email || "",
-            firstName: userInfo.firstName || "",
-            lastName: userInfo.lastName || "",
-            phoneNum: userInfo.phoneNum || "",
-          }));
-        } else {
-          //router.replace("/login");
-          return;
-        }
-      } catch (error) {
-        console.error("Error fetching user info:", error);
+          const userData = {
+            username: response.user.userName,
+            userID: response.user.userID,
+            password: response.user.password,
+            email: response.user.email,
+            phoneNum: response.user.phoneNum,
+            fullName,
+          };
+  
+          setUserInfor(userData);
+          setOriginalUserInfor(userData);
+        })
+        .catch ((error) => {
+          if (error.response?.status === 401) {
+            const errorMessage = error.response.data?.error;
+            Alert.alert("Error", errorMessage, [{ text: "OK" }]);
+            return;
+          } else {
+            console.error("Unexpected error:", error);
+            return;
+          }
+        })
       }
-    }
+    };
     getInfo();
-    console.log(userInfor);
   }, []);
 
   const handleSave = async () => {
-    setIsSave(true);
-    setModalVisible(true);
+    let token = await AsyncStorage.getItem("AccessToken");
+    
+    if (!isValidEmail(userInfor.email)) {
+      Alert.alert("Error", "Email không hợp lệ!");
+      return;
+    }
+  
+    if (!isValidPhone(userInfor.phoneNum)) {
+      Alert.alert("Error", "Số điện thoại phải có đúng 10 số!");
+      return;
+    }
+
+    if (!token) return;
+    const parts = userInfor.fullName.trim().split(/\s+/);
+    const firstName = parts.shift() || ""; 
+    const lastName = parts.join(" ");
+
+    authService
+    .updateUserInfo(parseInt(userInfor.userID, 10), token, firstName, lastName, userInfor.phoneNum, userInfor.email )
+    .then((response) => {      
+      setIsSave(true);
+      setModalVisible(true);
+      setIsEdit(false);
+
+      // Đóng modal sau 2 giây
+      setTimeout(() => {
+        setModalVisible(false);
+        setIsSave(false);
+      }, 2000);
+    })
+    .catch((error) => {         
+      if (error.response?.status === 401) {
+        const errorMessage = error.response.data?.error;
+        Alert.alert("Error", errorMessage, [{ text: "OK" }]);
+        return;
+      } else {
+        console.error("Unexpected error:", error);
+        return;   
+      }
+    });
+  };
+
+  const handleCancel = () => {
+    if (originalUserInfor) {
+      setUserInfor(originalUserInfor);
+    }
     setIsEdit(false);
-    setTimeout(() => {
-      setModalVisible(false);
-      setIsSave(false);
-    }, 2000);
-    return;
   };
 
   const handleLogOut = async () => {
@@ -99,22 +150,64 @@ const profile = () => {
           source={require("@/assets/images/profile_img.png")}
         />
         <CustomTextBold style={styles.userName}>
-          Dang Tuan fammer
+          {userInfor?.fullName ? userInfor?.fullName : userInfor?.username} Fammer
         </CustomTextBold>
         <CustomTextMedium style={styles.sectionTitle}>
           Thông tin cá nhân
         </CustomTextMedium>
         <TextInput
-          placeholder="Đặng Minh Tuấn"
+          placeholder="Họ và tên"
           placeholderTextColor="black"
-          style={[styles.input, styles.centerText]}
+          style={[
+            styles.input,
+            isEdit ? styles.leftText : styles.centerText, 
+          ]}
+          value={userInfor?.fullName || (isEdit ? "" : undefined)}
+          onChangeText={(text) => {
+            setUserInfor((prevState) => ({
+              ...prevState,
+              fullName: text, 
+            }));
+          }}
+          editable={isEdit}
         />
         <TextInput
-          placeholder="02/02/2004"
+          placeholder="Số điện thoại"
           placeholderTextColor="black"
-          style={[styles.input, styles.centerText]}
+          style={[
+            styles.input,
+            isEdit ? styles.leftText : styles.centerText,
+          ]}
+          value={userInfor?.phoneNum || (isEdit ? "" : undefined)}
+          onChangeText={(text) => {
+            const onlyNumbers = text.replace(/[^0-9]/g, "");
+            setUserInfor((prevState) => ({
+              ...prevState,
+              phoneNum: onlyNumbers || "",
+            }));
+          }}
+          editable={isEdit}
+          keyboardType="phone-pad"
+          maxLength={10}    
         />
-        {isEdit ? (
+
+        <TextInput
+          placeholder="Email"
+          placeholderTextColor="black"
+          style={[
+            styles.input,
+            isEdit ? styles.leftText : styles.centerText, // Căn trái khi chỉnh sửa
+          ]}
+          value={userInfor?.email || (isEdit ? "" : undefined)}
+          onChangeText={(text) => {
+            setUserInfor((prevState) => ({
+              ...prevState,
+              email: text || "",
+            }));
+          }}
+          editable={isEdit}
+        />
+        {/* {isEdit ? (
           <View className="w-full items-center">
             <CustomTextMedium style={styles.sectionTitle}>
               Mật khẩu
@@ -135,7 +228,7 @@ const profile = () => {
               style={styles.input}
             />
           </View>
-        ) : null}
+        ) : null} */}
         {!isEdit ? (
           <View className="flex-row items-center p-3 gap-2 mt-4 ">
             <TouchableOpacity
@@ -175,7 +268,7 @@ const profile = () => {
               className="flex-row items-center p-3 gap-2 mt-2"
               style={styles.button}
               onPress={() => {
-                setIsEdit(false);
+                handleCancel();
               }}
             >
               <CustomTextBold style={styles.buttonText}>
@@ -260,7 +353,10 @@ const styles = StyleSheet.create({
     color: "black",
   },
   centerText: {
-    textAlign: "center",
+    textAlign: "center", 
+  },
+  leftText: {
+    textAlign: "left", 
   },
   button: {
     borderWidth: 2,

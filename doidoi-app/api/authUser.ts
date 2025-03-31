@@ -48,6 +48,27 @@ const authService = {
         console.error("Unexpected error: ", error);
     }}
   },
+  updateUserInfo: async (userID: number, token: string, firstName: string, lastName: string, phoneNum: string, email: string) => {
+    try {
+      const response = await axiosClient.put('auth/userInfor', {
+          userID: userID,
+          firstName: firstName, 
+          lastName: lastName, 
+          phoneNum: phoneNum, 
+          email: email
+        }, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+      });
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw error;
+      } else {
+        console.error("Unexpected error: ", error);
+    }}
+  },
 };
 
 export default authService;

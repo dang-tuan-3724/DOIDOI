@@ -42,8 +42,7 @@ const login = () => {
           Alert.alert("Error", errorMessage, [{ text: "OK" }]);
           return;
         } else {
-          console.error(error.response);
-          return;   
+          console.error("Unexpected error:", error);
         }
       });
   };
@@ -73,8 +72,7 @@ const login = () => {
           Alert.alert("Error", errorMessage, [{ text: "OK" }]);
           return;
         } else {
-          console.error(error.response);
-          return;   
+          console.error("Unexpected error:", error);
         }
       });
   };
