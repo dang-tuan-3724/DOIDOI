@@ -25,7 +25,6 @@ const profile = () => {
   const [isSave, setIsSave] = useState(false);
   const [originalUserInfor, setOriginalUserInfor] = useState<{
     username: string;
-    userID: string;
     password: string;
     email: string;
     fullName: string;
@@ -33,7 +32,6 @@ const profile = () => {
   } | null>(null);
   const [userInfor, setUserInfor] = useState({
     username: "",
-    userID: "",
     password: "",
     email: "",
     fullName: "",
@@ -43,16 +41,14 @@ const profile = () => {
   useEffect(() => {
     const getInfo = async () => {
       let token = await AsyncStorage.getItem("AccessToken");
-      const userID = await AsyncStorage.getItem("userID");
-      if (userID && token) {
+      if (token) {
         authService
-        .getUserInfo(parseInt(userID, 10), token)
+        .getUserInfo(token)
         .then((response) => {          
           const fullName = `${response.user.firstName ?? ""} ${response.user.lastName ?? ""}`.trim();
           
           const userData = {
             username: response.user.userName,
-            userID: response.user.userID,
             password: response.user.password,
             email: response.user.email,
             phoneNum: response.user.phoneNum,
@@ -66,7 +62,7 @@ const profile = () => {
           if (error.response?.status === 401) {
             const errorMessage = error.response.data?.error;
             Alert.alert("Error", errorMessage, [{ text: "OK" }]);
-            return;
+            router.replace("/login");
           } else {
             console.error("Unexpected error:", error);
             return;
@@ -96,7 +92,7 @@ const profile = () => {
     const lastName = parts.join(" ");
 
     authService
-    .updateUserInfo(parseInt(userInfor.userID, 10), token, firstName, lastName, userInfor.phoneNum, userInfor.email )
+    .updateUserInfo(token, firstName, lastName, userInfor.phoneNum, userInfor.email )
     .then((response) => {      
       setIsSave(true);
       setModalVisible(true);
@@ -112,7 +108,7 @@ const profile = () => {
       if (error.response?.status === 401) {
         const errorMessage = error.response.data?.error;
         Alert.alert("Error", errorMessage, [{ text: "OK" }]);
-        return;
+        router.replace("/login");
       } else {
         console.error("Unexpected error:", error);
         return;   
