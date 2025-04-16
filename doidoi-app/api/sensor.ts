@@ -53,6 +53,23 @@ const sensors = {
         console.error("Unexpected error: ", error);
     }}
   },
+  deleteSensor: async (token: string, sensorId: number) => {
+    try {
+      const response = await axiosClient.delete(`sensor/${sensorId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+                
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw error;
+      } else {
+        console.error("Unexpected error: ", error);
+      }
+    }
+  },
 };
 
 export default sensors;
