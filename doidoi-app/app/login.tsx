@@ -34,7 +34,7 @@ const login = () => {
           setModalVisible(false);
           setShowSignUp(false);
           router.replace("/(tabs)");
-        }, 2000);
+        }, 2000); 
       })
       .catch((error) => {
         if (error.response?.status === 400) {
@@ -47,6 +47,9 @@ const login = () => {
       });
   };
 
+  useEffect(() => {
+    logAsyncStorageData();
+  }, []);
   const handleSignUp = async () => {
     if (password !== confirmPassword) {
       Alert.alert("Wrong password", "Password must be matched!", [{ text: "OK" }]);
