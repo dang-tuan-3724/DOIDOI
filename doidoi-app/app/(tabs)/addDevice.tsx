@@ -63,7 +63,7 @@ const AddDevice = () => {
       setDeviceName("");
       setMsg("");
       setDeviceType(null);
-    }, 3000);
+    }, 2000);
   };
   
   const handleError = (error: any) => {
