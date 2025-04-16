@@ -40,6 +40,8 @@ const profile = () => {
 
   useEffect(() => {
     const getInfo = async () => {
+
+      logAsyncStorageData();
       let token = await AsyncStorage.getItem("AccessToken");
       if (token) {
         authService
@@ -71,6 +73,7 @@ const profile = () => {
       }
     };
     getInfo();
+
   }, []);
 
   const handleSave = async () => {
@@ -121,6 +124,18 @@ const profile = () => {
       setUserInfor(originalUserInfor);
     }
     setIsEdit(false);
+  };
+  const logAsyncStorageData = async () => {
+    try {
+      const keys = await AsyncStorage.getAllKeys();
+      const items = await AsyncStorage.multiGet(keys);
+      console.log('AsyncStorage Data:');
+      items.forEach(([key, value]) => {
+        console.log(`${key}: ${value}`);
+      });
+    } catch (error) {
+      console.error('Error getting AsyncStorage data:', error);
+    }
   };
 
   const handleLogOut = async () => {
