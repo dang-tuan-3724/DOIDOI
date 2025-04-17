@@ -27,10 +27,9 @@ const Splash = () => {
   return (
     <View style={styles.container}>
       <Image
-        source={require("@/assets/images/logo_zoizoi.png")} // Đường dẫn đến logo
+        source={require("@/assets/images/Zoizoi_logo_full.png")} // Đường dẫn đến logo
         style={styles.logo}
       />
-      <Text style={styles.text}>Welcome to DOIDOI</Text>
       <ActivityIndicator size="large" color="#ffffff" style={styles.loading} />
     </View>
   );
@@ -46,8 +45,8 @@ const styles = StyleSheet.create({
     backgroundColor: "white", // Màu nền
   },
   logo: {
-    width: 150,
-    height: 150,
+    width: 250,
+    height: 300,
     marginBottom: 0,
   },
   text: {
