@@ -47,6 +47,19 @@ const login = () => {
       });
   };
 
+  const logAsyncStorageData = async () => {
+    try {
+      const accessToken = await AsyncStorage.getItem("AccessToken");
+      const userInfo = await AsyncStorage.getItem("userInfo");
+      const userID = await AsyncStorage.getItem("userID");
+
+      console.log("AccessToken:", accessToken);
+      console.log("userInfo:", userInfo);
+      console.log("userID:", userID);
+    } catch (error) {
+      console.error("Error retrieving data from AsyncStorage:", error);
+    }
+  };
   useEffect(() => {
     logAsyncStorageData();
   }, []);

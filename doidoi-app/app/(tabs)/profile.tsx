@@ -133,6 +133,7 @@ const profile = () => {
       items.forEach(([key, value]) => {
         console.log(`${key}: ${value}`);
       });
+
     } catch (error) {
       console.error('Error getting AsyncStorage data:', error);
     }
