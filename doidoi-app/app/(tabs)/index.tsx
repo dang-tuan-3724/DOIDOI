@@ -12,7 +12,6 @@ import { useEffect } from "react";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
-import { API_URL } from '@env'
 
 const Index = () => {
   const [fontsLoaded] = useFonts({
@@ -50,7 +49,8 @@ const Index = () => {
   let humidLimit = 0; // Default humidity limit
   let somoLimit = 0; // Default soil moisture limit
   let luxLimit = 0; // Default light limit
-  const base_url = API_URL;
+  const base_url = process.env.EXPO_PUBLIC_API_URL;
+  
   useEffect(() => {
     // Function to fetch temperature data
     const getLimit = async () => {
@@ -85,7 +85,7 @@ const Index = () => {
     try {
       const token = await AsyncStorage.getItem("AccessToken");
       if (!token) {
-        console.error("No access token found");
+        //console.error("No access token found");
         return;
       }
       // Retrieve alert settings from AsyncStorage
@@ -128,7 +128,7 @@ const Index = () => {
       try {
         const token = await AsyncStorage.getItem("AccessToken");
         if (!token) {
-          console.error("No access token found");
+          //console.error("No access token found");
           return;
         }
         // Retrieve alert settings from AsyncStorage
@@ -172,7 +172,7 @@ const Index = () => {
       try {
         const token = await AsyncStorage.getItem("AccessToken");
         if (!token) {
-          console.error("No access token found");
+          //console.error("No access token found");
           return;
         }
 
@@ -212,7 +212,7 @@ const Index = () => {
       try {
         const token = await AsyncStorage.getItem("AccessToken");
         if (!token) {
-          console.error("No access token found");
+          //console.error("No access token found");
           return;
         }
 

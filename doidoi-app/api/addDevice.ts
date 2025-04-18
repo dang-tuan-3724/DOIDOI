@@ -42,31 +42,11 @@ const device = {
             console.error("Unexpected error: ", error);
         }}
     },
-    addLightSensor: async (token: string, sensorName: string, alertThreshold: number) => {
+    addSensor: async (token: string, sensorName: string, type: string, alertThreshold: number) => {
         try {
             const response = await axiosClient.post('sensor', {
                 sensorName: sensorName,
-                type: "Light Sensor",
-                alertThreshold: alertThreshold,
-                status: "able"
-            }, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            return response.data;
-        } catch (error) {
-            if (axios.isAxiosError(error)) {
-                throw error;
-            } else {
-            console.error("Unexpected error: ", error);
-        }}
-    },
-    addTempAndHumdSensor: async (token: string, sensorName: string, alertThreshold: number) => {
-        try {
-            const response = await axiosClient.post('sensor', {
-                sensorName: sensorName,
-                type: "Temperature & Humidity Sensor",
+                type: type,
                 alertThreshold: alertThreshold,
                 status: "able"
             }, {

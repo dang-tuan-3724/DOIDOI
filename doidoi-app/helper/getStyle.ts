@@ -9,20 +9,18 @@ export function getDeviceStyle(type: string) {
   }
 }
 
-export function getSensorStyle(sensorName: string) {
-  const tag = sensorName.split("#")[1]?.trim();
-
-  switch (tag) {
-    case "light":
-      return { color: "#FFF2D0", title: sensorName.split("#")[0].trim(), value: "LUX" };
-    case "soil_humid":
-      return { color: "#F3FFA8", title: sensorName.split("#")[0].trim(), value: "%" };
-    case "humidity":
-      return { color: "#BAFF8F", title: sensorName.split("#")[0].trim(), value: "%" };
-    case "temperature":
-      return { color: "#ffebb7", title: sensorName.split("#")[0].trim(), value: "°C" };
+export function getSensorStyle(sensor: any) {
+  switch (sensor.type) {
+    case "Light Sensor":
+      return { color: "#FFF2D0", title: sensor.sensorName, value: "LUX" };
+    case "Soil Moisture Sensor":
+      return { color: "#F3FFA8", title: sensor.sensorName, value: "%" };
+    case "Humidity Sensor":
+      return { color: "#BAFF8F", title: sensor.sensorName, value: "%" };
+    case "Temperature Sensor":
+      return { color: "#ffebb7", title: sensor.sensorName, value: "°C" };
     default:
-      return { color: "#FFFFFF", title: sensorName, value: "" };
+      return { color: "#FFFFFF", title: sensor.sensorName, value: "" };
   }
 }
 

@@ -143,6 +143,7 @@ const profile = () => {
     await AsyncStorage.removeItem("AccessToken");
     await AsyncStorage.removeItem("userID");
     await AsyncStorage.removeItem("userInfor");
+    await AsyncStorage.removeItem("ListAlert");
 
     setModalVisible(true);
     

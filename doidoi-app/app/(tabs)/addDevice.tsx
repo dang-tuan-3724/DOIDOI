@@ -18,11 +18,18 @@ const AddDevice = () => {
   const deviceTypeOptions = [
     { label: "Máy bơm", value: "pump" },
     { label: "Đèn", value: "light" },
-    { label: "Cảm biến ánh sáng", value: "lightSensor" },
-    { label: "Cảm biến nhiệt độ", value: "tempSensor" },
-    { label: "Cảm biến độ ẩm đất", value: "humdSensor1" },
-    { label: "Cảm biến độ ẩm không khí", value: "humdSensor2" },
+    { label: "Cảm biến ánh sáng", value: "Light Sensor" },
+    { label: "Cảm biến nhiệt độ", value: "Temperature Sensor" },
+    { label: "Cảm biến độ ẩm đất", value: "Soil Moisture Sensor" },
+    { label: "Cảm biến độ ẩm không khí", value: "Humidity Sensor" },
   ];
+
+  const sensorValueMap: Record<string, number> = {
+    "Light Sensor": 10,
+    "Temperature Sensor": 30.5,
+    "Soil Moisture Sensor": 70,
+    "Humidity Sensor": 70,
+  };
 
   const handleAddDevice = async () => {
     const token = await AsyncStorage.getItem("AccessToken");
@@ -36,28 +43,13 @@ const AddDevice = () => {
       device.addPump(token, deviceName).then(handleSuccess).catch(handleError);
     } else if (deviceType === "light") {
       device.addLight(token, deviceName).then(handleSuccess).catch(handleError);
-    } else if (
-      deviceType === "tempSensor" ||
-      deviceType === "humdSensor1" ||
-      deviceType === "humdSensor2"
-    ) {
-      let alertThreshold = deviceType === "tempSensor" ? 30.5 : 70;
-      let flag =
-        deviceType === "tempSensor"
-          ? " #temperature"
-          : deviceType === "humdSensor1"
-          ? " #soil_humid"
-          : " #humidity";
+    } else {
+      let alertThreshold = sensorValueMap[deviceType];
       device
-        .addTempAndHumdSensor(token, deviceName + flag, alertThreshold)
+        .addSensor(token, deviceName, deviceType, alertThreshold)
         .then(handleSuccess)
         .catch(handleError);
-    } else if (deviceType === "lightSensor") {
-      device
-        .addLightSensor(token, deviceName + " #light", 10)
-        .then(handleSuccess)
-        .catch(handleError);
-    }
+    } 
   };
 
   const handleSuccess = (response: any) => {

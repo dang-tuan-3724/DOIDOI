@@ -19,7 +19,6 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import * as Print from 'expo-print'; // Add this import for PDF generation
-import { API_URL } from '@env'
 
 // Define interface for log item
 interface LogItem {
@@ -69,8 +68,8 @@ const LogScreen = () => {
         console.error("No access token found");
         return;
       }
-
-      const response = await axios.get(`${API_URL}history`, {
+      
+      const response = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}history`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

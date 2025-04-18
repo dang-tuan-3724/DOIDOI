@@ -1,8 +1,7 @@
 import axios from 'axios';
-import { API_URL } from '@env'
 
 const axiosClient = axios.create({
-  baseURL: API_URL,
+  baseURL: process.env.EXPO_PUBLIC_API_URL,
   headers: {
     'Content-Type': 'application/json',
   },

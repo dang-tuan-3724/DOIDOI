@@ -77,13 +77,20 @@ export default function DeviceControlCard() {
     fetchData();
   }, []);
 
+  const sensorValueMap: Record<string, string> = {
+    "Light Sensor": "light",
+    "Temperature Sensor": "temperature",
+    "Soil Moisture Sensor": "soil_humid",
+    "Humidity Sensor": "humidity",
+  };
+
   useEffect(() => {
     const getListAlert = async () => {
       if (sensors.length > 0) {
         const filtered = sensors
           .filter(sensor => sensor.status === "able")
           .map(sensor => {
-            const flag = sensor.sensorName.split("#")[1]?.trim() || "";
+            const flag = sensorValueMap[sensor.type];
             return {
               id: sensor.sensorID,
               alert: sensor.alertThreshold,
@@ -91,10 +98,10 @@ export default function DeviceControlCard() {
             };
           });
     
-        await AsyncStorage.setItem("ListAlert", JSON.stringify(filtered));
+        await AsyncStorage.setItem("ListAlert", JSON.stringify(filtered));        
       }
     }
-
+    
     getListAlert();
   }, [sensors]); // chạy khi sensors thay đổi
   
@@ -140,7 +147,7 @@ export default function DeviceControlCard() {
 
             {/** Sensor Cards */}
             {sensors?.map((item, index) => {
-            const sensorStyle = getSensorStyle(item.sensorName);
+            const sensorStyle = getSensorStyle(item);
             
             return (
               <SensorCard key={item.sensorID} item={item} sensorStyle={sensorStyle} styles={styles} handleDelete={handleDeleteSensor} />
