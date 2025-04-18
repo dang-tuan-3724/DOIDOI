@@ -12,6 +12,7 @@ import { useEffect } from "react";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
+import { API_URL } from '@env'
 
 const Index = () => {
   const [fontsLoaded] = useFonts({
@@ -49,7 +50,7 @@ const Index = () => {
   let humidLimit = 0; // Default humidity limit
   let somoLimit = 0; // Default soil moisture limit
   let luxLimit = 0; // Default light limit
-  const base_url = process.env.API_URL;
+  const base_url = API_URL;
   useEffect(() => {
     // Function to fetch temperature data
     const getLimit = async () => {

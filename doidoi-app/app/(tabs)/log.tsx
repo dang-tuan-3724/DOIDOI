@@ -19,10 +19,10 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import * as Print from 'expo-print'; // Add this import for PDF generation
+import { API_URL } from '@env'
 
 // Define interface for log item
 interface LogItem {
-  key: number;  
   id: string;
   date: string;
   activity: string;
@@ -70,7 +70,7 @@ const LogScreen = () => {
         return;
       }
 
-      const response = await axios.get(`http://10.0.2.2:3000/api/history`, {
+      const response = await axios.get(`${API_URL}history`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -78,7 +78,7 @@ const LogScreen = () => {
 
       if (response.data && response.data.timeline) {
         //console.log("Fetched logs:", response.data);
-        const formattedLogs = response.data.timeline.map((log, index) => {
+        const formattedLogs = response.data.timeline.map((log) => {
 
           // Format date (YYYY-MM-DD)
           const date = new Date(log.time);
@@ -93,7 +93,6 @@ const LogScreen = () => {
           const category = log.type;
 
           return {
-            key:index,
             id: log.data.controlID ? log.data.controlID.toString():log.data.warningID.toString(),
             date: formattedDate,
             activity: log.data.message?log.data.message : log.data.action,
@@ -165,8 +164,8 @@ const LogScreen = () => {
               h1 { text-align: center; color: #333; }
               .header { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 10px; border-bottom: 1px solid #ccc; padding-bottom: 5px; }
               .log-item { display: flex; justify-content: space-between; padding: 10px; margin-bottom: 8px; border-radius: 5px; }
-              .user { background-color: #E3FFDE; }
-              .system { background-color: #C4FFB8; }
+              .control { background-color: #C4FFB8; }
+              .warning { background-color: #ff7c6b; }
               .date, .activity { flex: 1; text-align: center; }
             </style>
           </head>
@@ -181,7 +180,7 @@ const LogScreen = () => {
 
       // Add log items to HTML
       filteredLogs.forEach(log => {
-        const logClass = log.category === "Người dùng" ? "user" : "system";
+        const logClass = log.category === "CONTROL" ? "control" : "warning";
         htmlContent += `
           <div class="log-item ${logClass}">
             <div class="date">${log.date}</div>
@@ -405,7 +404,7 @@ const LogScreen = () => {
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
           data={filteredLogs}
-          keyExtractor={(item) => item.key}
+          keyExtractor={(item, index) => index.toString()}
           renderItem={({ item }) => (
             <View
               style={[

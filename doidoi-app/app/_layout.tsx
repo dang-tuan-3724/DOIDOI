@@ -1,6 +1,5 @@
 import { Stack, useRouter } from "expo-router";
 import { useEffect } from "react";
-import { MenuProvider } from 'react-native-popup-menu';
 import './globals.css'
 
 export default function RootLayout() {
