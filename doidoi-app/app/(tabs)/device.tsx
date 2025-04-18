@@ -49,6 +49,7 @@ export default function DeviceControlCard() {
 
   const fetchData = async () => {
     const token = await AsyncStorage.getItem("AccessToken");
+    
     if (!token) return;
 
     try {

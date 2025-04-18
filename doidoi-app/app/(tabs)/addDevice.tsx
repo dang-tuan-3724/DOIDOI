@@ -54,7 +54,7 @@ const AddDevice = () => {
         .catch(handleError);
     } else if (deviceType === "lightSensor") {
       device
-        .addLightSensor(token, deviceName + " #light", 200)
+        .addLightSensor(token, deviceName + " #light", 10)
         .then(handleSuccess)
         .catch(handleError);
     }

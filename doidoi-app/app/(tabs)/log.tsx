@@ -18,9 +18,11 @@ import axios from "axios";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
+import * as Print from 'expo-print'; // Add this import for PDF generation
 
 // Define interface for log item
 interface LogItem {
+  key: number;  
   id: string;
   date: string;
   activity: string;
@@ -74,10 +76,12 @@ const LogScreen = () => {
         },
       });
 
-      if (response.data && response.data.controlsHistory) {
-        const formattedLogs = response.data.controlsHistory.map((log) => {
+      if (response.data && response.data.timeline) {
+        //console.log("Fetched logs:", response.data);
+        const formattedLogs = response.data.timeline.map((log, index) => {
+
           // Format date (YYYY-MM-DD)
-          const date = new Date(log.timeSwitch);
+          const date = new Date(log.time);
           const formattedDate = `${date
             .getDate()
             .toString()
@@ -86,14 +90,13 @@ const LogScreen = () => {
             .padStart(2, "0")}.${date.getFullYear().toString().substring(2)}`;
 
           // Determine category based on action content
-          const category = log.action.includes("Thêm")
-            ? "Hệ thống"
-            : "Người dùng";
+          const category = log.type;
 
           return {
-            id: log.controlID.toString(),
+            key:index,
+            id: log.data.controlID ? log.data.controlID.toString():log.data.warningID.toString(),
             date: formattedDate,
-            activity: log.action,
+            activity: log.data.message?log.data.message : log.data.action,
             category: category,
             originalDate: date, // Store original date for filtering
           };
@@ -149,21 +152,57 @@ const LogScreen = () => {
 
   const handleDownload = async () => {
     try {
-      // Create a JSON object with the filtered logs
-      const dataToDownload = filteredLogs.map((log) => ({
-        id: log.id,
-        date: log.date,
-        activity: log.activity,
-        category: log.category,
-      }));
-
-      // Convert to JSON string
-      const jsonString = JSON.stringify(dataToDownload, null, 2);
-
       // Create a timestamp for the filename
       const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-      const fileName = `logs_${timestamp}.json`;
+      const fileName = `logs_${timestamp}.pdf`;
 
+      // Generate HTML content for the PDF
+      let htmlContent = `
+        <html>
+          <head>
+            <style>
+              body { font-family: Arial, sans-serif; margin: 20px; }
+              h1 { text-align: center; color: #333; }
+              .header { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 10px; border-bottom: 1px solid #ccc; padding-bottom: 5px; }
+              .log-item { display: flex; justify-content: space-between; padding: 10px; margin-bottom: 8px; border-radius: 5px; }
+              .user { background-color: #E3FFDE; }
+              .system { background-color: #C4FFB8; }
+              .date, .activity { flex: 1; text-align: center; }
+            </style>
+          </head>
+          <body>
+            <h1>Lịch sử hoạt động</h1>
+            <p>Thời gian xuất báo cáo: ${new Date().toLocaleString()}</p>
+            <div class="header">
+              <div class="date">Ngày</div>
+              <div class="activity">Hoạt động</div>
+            </div>
+      `;
+
+      // Add log items to HTML
+      filteredLogs.forEach(log => {
+        const logClass = log.category === "Người dùng" ? "user" : "system";
+        htmlContent += `
+          <div class="log-item ${logClass}">
+            <div class="date">${log.date}</div>
+            <div class="activity">${log.activity}</div>
+          </div>
+        `;
+      });
+
+      // Close HTML tags
+      htmlContent += `
+          </body>
+        </html>
+      `;
+
+      // Generate PDF from HTML - ensure we get a proper PDF
+      const { uri } = await Print.printToFileAsync({
+        html: htmlContent,
+        base64: false
+      });
+
+      // Handle file saving based on platform
       if (Platform.OS === "android") {
         try {
           // Get permissions and save with StorageAccessFramework
@@ -174,22 +213,29 @@ const LogScreen = () => {
             // Get the directory uri that was approved
             const directoryUri = permissions.directoryUri;
 
-            // Create the file in the selected directory
+            // Create the file in the selected directory with proper MIME type
             const fileUri =
               await FileSystem.StorageAccessFramework.createFileAsync(
                 directoryUri,
                 fileName,
-                "application/json"
+                "application/pdf"
               );
 
-            // Write the file content
-            await FileSystem.writeAsStringAsync(fileUri, jsonString, {
-              encoding: FileSystem.EncodingType.UTF8,
+            // Read the PDF file and write it to the destination
+            const pdfData = await FileSystem.readAsStringAsync(uri, { 
+              encoding: FileSystem.EncodingType.Base64 
             });
+            
+            // Write file with proper Base64 encoding
+            await FileSystem.StorageAccessFramework.writeAsStringAsync(
+              fileUri, 
+              pdfData, 
+              { encoding: FileSystem.EncodingType.Base64 }
+            );
 
             setModalMessage({
               title: "Đã lưu lịch sử hoạt động",
-              message: "Tệp đã được lưu vào thư mục bạn chọn",
+              message: "Tệp PDF đã được lưu vào thư mục bạn chọn",
             });
           } else {
             throw new Error("User did not grant permissions");
@@ -197,27 +243,27 @@ const LogScreen = () => {
         } catch (error) {
           console.error("SAF error:", error);
           // Fallback to sharing
-          const tempFileUri = `${FileSystem.cacheDirectory}${fileName}`;
-          await FileSystem.writeAsStringAsync(tempFileUri, jsonString);
-
           if (await Sharing.isAvailableAsync()) {
-            await Sharing.shareAsync(tempFileUri);
+            await Sharing.shareAsync(uri, {
+              mimeType: 'application/pdf',
+              UTI: 'com.adobe.pdf'
+            });
             setModalMessage({
               title: "Chia sẻ lịch sử hoạt động",
-              message: "Bạn có thể lưu tệp từ menu chia sẻ",
+              message: "Bạn có thể lưu tệp PDF từ menu chia sẻ",
             });
           }
         }
       } else {
-        // For iOS, use sharing as iOS doesn't have direct storage access
-        const tempFileUri = `${FileSystem.cacheDirectory}${fileName}`;
-        await FileSystem.writeAsStringAsync(tempFileUri, jsonString);
-
+        // For iOS, use sharing with proper MIME type
         if (await Sharing.isAvailableAsync()) {
-          await Sharing.shareAsync(tempFileUri);
+          await Sharing.shareAsync(uri, {
+            mimeType: 'application/pdf',
+            UTI: 'com.adobe.pdf'
+          });
           setModalMessage({
             title: "Chia sẻ lịch sử hoạt động",
-            message: "Bạn có thể lưu tệp từ menu chia sẻ",
+            message: "Bạn có thể lưu tệp PDF từ menu chia sẻ",
           });
         }
       }
@@ -231,7 +277,7 @@ const LogScreen = () => {
       console.error("Error downloading logs:", error);
       setModalMessage({
         title: "Lỗi tải xuống",
-        message: "Không thể tải xuống dữ liệu",
+        message: "Không thể tải xuống dữ liệu PDF",
       });
       setModalVisible(true);
       setTimeout(() => setModalVisible(false), 2000);
@@ -344,9 +390,8 @@ const LogScreen = () => {
 
       {/* Header */}
       <View style={styles.header}>
-        <CustomTextBold style={styles.headerText}>Ngày</CustomTextBold>
+        <CustomTextBold style={styles.headerTextDate}>Ngày</CustomTextBold>
         <CustomTextBold style={styles.headerText}>Hoạt động</CustomTextBold>
-        <CustomTextBold style={styles.headerText}>Phân loại</CustomTextBold>
       </View>
 
       {/* Danh sách hoạt động */}
@@ -360,25 +405,22 @@ const LogScreen = () => {
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
           data={filteredLogs}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.key}
           renderItem={({ item }) => (
             <View
               style={[
                 styles.logItem,
                 {
                   backgroundColor:
-                    item.category === "Người dùng" ? "#E3FFDE" : "#C4FFB8",
+                    item.category === "WARNING" ? "#ff7c6b" : "#C4FFB8",
                 },
               ]}
             >
-              <CustomTextMedium style={styles.logText}>
+              <CustomTextMedium style={styles.logTextDate}>
                 {item.date}
               </CustomTextMedium>
               <CustomTextMedium style={styles.logText}>
                 {item.activity}
-              </CustomTextMedium>
-              <CustomTextMedium style={styles.logText}>
-                {item.category}
               </CustomTextMedium>
             </View>
           )}
@@ -472,7 +514,12 @@ const styles = StyleSheet.create({
   },
   headerText: {
     fontSize: 20,
-    flex: 1,
+    width: "70%",
+    textAlign: "center",
+  },
+  headerTextDate: {
+    fontSize: 20,
+    width: "30%",
     textAlign: "center",
   },
   iconButton: {
@@ -487,6 +534,12 @@ const styles = StyleSheet.create({
     borderRadius: 30,
   },
   logText: {
+    flex: 3,
+    textAlign:"center",
+    fontSize: 14,
+    paddingHorizontal: 10,
+  },
+  logTextDate: {
     flex: 1,
     textAlign: "center",
     fontSize: 14,
