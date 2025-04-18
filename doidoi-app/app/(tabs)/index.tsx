@@ -116,7 +116,7 @@ const Index = () => {
           }
         })
         .catch((error) => {
-          // console.error("Error fetching lux data:", error);
+          console.error("Error fetching lux data:", error);
         });
     } catch (error) {
       console.error("Error retrieving access token:", error);
@@ -160,7 +160,7 @@ const Index = () => {
             }
           })
           .catch((error) => {
-            // console.error("Error fetching lux data:", error);
+            console.error("Error fetching temp data:", error);
           });
       } catch (error) {
         console.error("Error retrieving access token:", error);
