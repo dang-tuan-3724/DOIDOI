@@ -45,6 +45,10 @@ const Index = () => {
   const [humidAlert, setHumidAlert] = useState(false);
   const [somoAlert, setSomoAlert] = useState(false);
   const [lightAlert, setLightAlert] = useState(false);
+  const [lightnotConnected, setLightnotConnected] = useState(false);
+  const [tempnotConnected, setTempnotConnected] = useState(false);
+  const [humidnotConnected, setHumidnotConnected] = useState(false);
+  const [somoNotConnected, setSomoNotConnected] = useState(false);
   let tempLimit = 0; // Default temperature limit
   let humidLimit = 0; // Default humidity limit
   let somoLimit = 0; // Default soil moisture limit
@@ -53,6 +57,7 @@ const Index = () => {
   
   useEffect(() => {
     // Function to fetch temperature data
+
     const getLimit = async () => {
       const alertsString = await AsyncStorage.getItem("ListAlert");
       if (alertsString) {
@@ -117,6 +122,10 @@ const Index = () => {
           }
         })
         .catch((error) => {
+          // 
+          if (error.status == 500) {
+            setLightnotConnected(true);
+          }
           // console.error("Error fetching lux data:", error);
         });
     } catch (error) {
@@ -162,6 +171,9 @@ const Index = () => {
           })
           .catch((error) => {
             // console.error("Error fetching lux data:", error);
+            if (error.status == 500) {
+              setTempnotConnected(true);
+            }
           });
       } catch (error) {
         console.error("Error retrieving access token:", error);
@@ -201,7 +213,10 @@ const Index = () => {
             }
           })
           .catch((error) => {
-            console.error("Error fetching humid data:", error);
+            // console.error("Error fetching humid data:", error);
+            if (error.status == 500) {
+              setHumidnotConnected(true);
+            }
           });
       } catch (error) {
         console.error("Error retrieving access token:", error);
@@ -241,7 +256,10 @@ const Index = () => {
             }
           })
           .catch((error) => {
-            console.error("Error fetching somo data:", error);
+            // console.error("Error fetching somo data:", error);
+            if (error.status == 500) {
+              setSomoNotConnected(true);
+            }
           });
       } catch (error) {
         console.error("Error retrieving access token:", error);
@@ -277,24 +295,43 @@ const Index = () => {
       <View className="flex-1 justify-center items-center gap-5">
         <View className="flex-1 justify-center items-center w-[90%] h-60 bg-[#9AF7FF] rounded-[30px] mt-5">
           <CustomTextBold className="mt-10">Tình trạng vườn của bạn</CustomTextBold>
-          <View className="flex-1 w-full px-5">
+          <View className="flex-1 w-full px-5 items-center  align-items-center">
             {tempAlert || humidAlert || somoAlert ? (
-              <View className="justify-center items-center gap-5 align-items-center">
-                <CustomTextBold className="text-red-600 mb-1">Cảnh báo!</CustomTextBold>
-                <CustomText className="text-red-600">
+              <View className="justify-center items-center text-center gap-5 align-items-center w-full">
+                <CustomTextBold className="text-red-600 mb-1 text-center">Cảnh báo!</CustomTextBold>
+                <CustomText className="text-red-600 text-center">
                   {tempAlert ? "Nhiệt độ" : ""}
                   {tempAlert && (humidAlert || somoAlert) ? ", " : ""}
-                  {humidAlert ? "độ ẩm không khí" : ""}
+                  {humidAlert ? "Độ ẩm không khí" : ""}
                   {(tempAlert || humidAlert) && somoAlert ? ", " : ""}
-                  {somoAlert ? "độ ẩm đất" : ""} đang vượt mức cho phép, hãy kiểm tra ngay!
+                  {somoAlert ? "Độ ẩm đất" : ""} đang vượt mức cho phép, hãy kiểm tra ngay!
                 </CustomText>
               </View>
             ) : (
               <View className="justify-center items-center gap-5 align-items-center">
-                <CustomTextBold className="">Tuyệt vời!</CustomTextBold>
+              {(lightnotConnected || tempnotConnected || humidnotConnected || somoNotConnected) ? (
+                <View className="justify-center items-center align-items-center">
+                  <CustomTextBold className="text-red-600 mb-1">Cảnh báo!</CustomTextBold>
+                  <CustomText className="text-red-600">
+                    Chưa kết nối cảm biến 
+                    {lightnotConnected ? " ánh sáng" : ""}
+                    {lightnotConnected && (tempnotConnected || humidnotConnected || somoNotConnected) ? "," : ""}
+                    {tempnotConnected ? " nhiệt độ" : ""}
+                    {tempnotConnected && (humidnotConnected || somoNotConnected) ? "," : ""}
+                    {humidnotConnected ? " độ ẩm không khí" : ""}
+                    {humidnotConnected && somoNotConnected ? "," : ""}
+                    {somoNotConnected ? " độ ẩm đất" : ""}
+                  </CustomText>
+                </View>
+              ) : (
+                <View>
+                <CustomTextBold className="text-green-600 mb-1">Tuyệt vời!</CustomTextBold>
                 <CustomText className="">
-                  Mọi thứ đang hoạt động hoàn hảo.
-                </CustomText>
+                Mọi thứ đang hoạt động hoàn hảo.
+              </CustomText>
+              </View>
+              )}
+
               </View>
             )}
           </View>
