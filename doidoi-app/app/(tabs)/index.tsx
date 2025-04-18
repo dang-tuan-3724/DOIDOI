@@ -35,12 +35,20 @@ const Index = () => {
       timestamp: Date;
     }[]
   >([]);
+  const [lightArr, setLightArr] = useState<
+    {
+      value: number;
+      timestamp: Date;
+    }[]
+  >([]);
   const [tempAlert, setTempAlert] = useState(false);
   const [humidAlert, setHumidAlert] = useState(false);
   const [somoAlert, setSomoAlert] = useState(false);
+  const [lightAlert, setLightAlert] = useState(false);
   let tempLimit = 0; // Default temperature limit
   let humidLimit = 0; // Default humidity limit
   let somoLimit = 0; // Default soil moisture limit
+  let luxLimit = 0; // Default light limit
   const base_url = process.env.API_URL;
   useEffect(() => {
     // Function to fetch temperature data
@@ -52,6 +60,11 @@ const Index = () => {
           const tempAlert = alertsList.find(alert => alert.flag === "temperature");
           const humidAlert = alertsList.find(alert => alert.flag === "humidity");
           const somoAlert = alertsList.find(alert => alert.flag === "soil_humid");
+          const luxAlert = alertsList.find(alert => alert.flag === "light");
+          // Set the limits based on the alerts found
+          if (luxAlert) {
+            luxLimit = luxAlert.alert;
+          }
           if (tempAlert) {
             tempLimit = tempAlert.alert;
           }
@@ -66,7 +79,50 @@ const Index = () => {
         }
       }
     }
-  
+  //---------------------------------------------------
+  const fetchLight = async () => {
+    try {
+      const token = await AsyncStorage.getItem("AccessToken");
+      if (!token) {
+        console.error("No access token found");
+        return;
+      }
+      // Retrieve alert settings from AsyncStorage
+
+
+
+      axios
+        .get(`${base_url}adafruit/fetch-lux`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((response) => {
+          if (response.data) {
+            const luxData = response.data.data[0];
+           //console.log(response.data.data[0]);;
+            const newLuxReading = {
+              value: parseFloat(luxData.value),
+              timestamp: new Date(luxData.created_at),
+            };
+            if (response.data.data[0].value<luxLimit) {
+              setLightAlert(true);
+            } else{
+              setLightAlert(false);
+            }
+            // console.log(luxLimit);
+            // Update tempArr with new reading (using functional update to avoid stale state)
+            setLightArr((prevLuxArr) => [...prevLuxArr, newLuxReading]);
+          }
+        })
+        .catch((error) => {
+          // console.error("Error fetching lux data:", error);
+        });
+    } catch (error) {
+      console.error("Error retrieving access token:", error);
+    }
+  };
+  // -------------------------------------------------- 
     const fetchTemperature = async () => {
       try {
         const token = await AsyncStorage.getItem("AccessToken");
@@ -87,12 +143,13 @@ const Index = () => {
           .then((response) => {
             if (response.data) {
               const tempData = response.data.data[0];
-             // console.log(response.data.data[0]);
+             //console.log(response.data.data[0]);;
               const newTempReading = {
                 value: parseFloat(tempData.value),
                 timestamp: new Date(tempData.created_at),
               };
-              if (response.data.data[0]>tempLimit) {
+              if (response.data.data[0].value>tempLimit) {
+                
                 setTempAlert(true);
               } else{
                 setTempAlert(false);
@@ -103,7 +160,7 @@ const Index = () => {
             }
           })
           .catch((error) => {
-            console.error("Error fetching temperature data:", error);
+            // console.error("Error fetching lux data:", error);
           });
       } catch (error) {
         console.error("Error retrieving access token:", error);
@@ -127,12 +184,12 @@ const Index = () => {
           .then((response) => {
             if (response.data) {
               const humData = response.data.data[0];
-             // console.log(response.data.data[0]);
+             //console.log(response.data.data[0]);;
               const newHumidReading = {
                 value: parseFloat(humData.value),
                 timestamp: new Date(humData.created_at),
               };
-              if (response.data.data[0] > humidLimit) {
+              if (response.data.data[0].value > humidLimit) {
                 setHumidAlert(true);
               }
               else{
@@ -167,12 +224,12 @@ const Index = () => {
           .then((response) => {
             if (response.data) {
               const somoData = response.data.data[0];
-             // console.log(response.data.data[0]);
+             //console.log(response.data.data[0]);;
               const newSomoReading = {
                 value: parseFloat(somoData.value),
                 timestamp: new Date(somoData.created_at),
               };
-              if (response.data.data[0]>somoLimit) {
+              if (response.data.data[0].value>somoLimit) {
                 setSomoAlert(true);
               }
               else{
@@ -194,17 +251,23 @@ const Index = () => {
     fetchTemperature();
     fetchHumid();
     fetchSomo();
+    fetchLight();
  // Call the function to get the limits
+    const intervalId5 = setInterval(getLimit, 1000);
     const intervalId = setInterval(fetchTemperature, 3000);
     const intervalId2 = setInterval(fetchHumid, 3000);
     const intervalId3 = setInterval(fetchSomo, 3000);
+    const intervalId4 = setInterval(fetchLight, 3000);
 
     return () => {
       clearInterval(intervalId);
       clearInterval(intervalId2);
       clearInterval(intervalId3);
+      clearInterval(intervalId4);
+      clearInterval(intervalId5);
     };
   }, []);
+
   if (!fontsLoaded) {
     return <AppLoading />;
   }
@@ -327,7 +390,7 @@ const Index = () => {
                     somoArr.length > 0
                       ? somoArr.slice(-7).map((item) => item.value)
                       : [25, 26, 28], // Dữ liệu độ ẩm không khí
-                  color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`, // Màu xanh lục
+                  color: (opacity = 1) => `rgba(255, 238, 46, ${opacity})`, // Màu xanh lục
                   strokeWidth: 4,
                 },
               ],
@@ -347,6 +410,61 @@ const Index = () => {
                 r: "4",
                 strokeWidth: "2",
                 stroke: "#FFFFFF",
+              },
+            }}
+            bezier
+            style={{
+              marginVertical: 5,
+              borderRadius: 30,
+              alignSelf: "center",
+            }}
+          />
+          
+        </View>
+        <View className="flex-1 justify-center items-center ">
+          <CustomTextBold className="">
+            Cường độ ánh sáng hiện tại:{" "}
+            {lightArr.length > 0
+              ? lightArr[lightArr.length - 1].value
+              : "Đang tải..."}{" "}
+            LUX
+          </CustomTextBold>
+          <LineChart
+            data={{
+              labels: lightArr
+          .slice(-7)
+          .map(
+            (item) =>
+              item.timestamp.getHours().toString().padStart(2, "0") +
+              ":" +
+              item.timestamp.getMinutes().toString().padStart(2, "0")
+          ),
+              datasets: [
+          {
+            data:
+              lightArr.length > 0
+                ? lightArr.slice(-7).map((item) => item.value)
+                : [25, 26, 28],
+            color: (opacity = 1) => `rgba(255, 99, 132, ${opacity})`, // Màu đỏ
+            strokeWidth: 4,
+          },
+              ],
+              legend: [`Cường độ (LUX)`],
+            }}
+            width={Dimensions.get("window").width - 40}
+            height={200}
+            yAxisSuffix="LUX"
+            chartConfig={{
+              backgroundColor: lightAlert ? "#FF0000" : "#f6ffb0",
+              backgroundGradientFrom: lightAlert ? "#FF5555" : "#f6ffb0",
+              backgroundGradientTo: "#f6ffb0",
+              decimalPlaces: 0,
+              color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+              labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+              propsForDots: {
+          r: "4",
+          strokeWidth: "2",
+          stroke: "#ffa726",
               },
             }}
             bezier
