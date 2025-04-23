@@ -1,4 +1,4 @@
-
+av
 # 🌱 ZoiZoiFarm - Hệ thống Quản lý Tưới tiêu Thông minh
 
 **ZoiZoiFarm** là dự án đột phá ứng dụng công nghệ tiên tiến vào nông nghiệp, tích hợp cảm biến hiện đại và tự động hóa điều khiển thiết bị tưới tiêu, chiếu sáng thông qua nền tảng **Adafruit IO**. Hệ thống giúp giảm thiểu công sức người dùng đồng thời tối ưu hóa lượng nước và năng lượng sử dụng.  
@@ -41,7 +41,7 @@ Tối ưu hóa tài nguyên thiên nhiên (nước, đất) bằng:
 
 1. **Clone dự án**  
    ```bash
-   git clone https://github.com/[username]/zoizoifarm.git
+   https://github.com/dang-tuan-3724/ZOIZOI.git
    cd zoizoifarm
    ```
 
